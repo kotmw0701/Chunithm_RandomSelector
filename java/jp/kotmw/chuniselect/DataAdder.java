@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 public class DataAdder {
 	
@@ -22,7 +23,7 @@ public class DataAdder {
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
-			statement.executeUpdate("CREATE TABLE music (category, title, artist, bpm, basic, advanced, expert, master)");
+			statement.executeUpdate("CREATE TABLE music (category TEXT, title TEXT, artist TEXT, bpm INTEGER, basic REAL, advanced REAL, expert REAL, master REAL)");
 			//statement.executeUpdate("create table title (category, title);");
 			//statement.executeUpdate("create table artist (title, artist);");
 			//statement.executeUpdate("create table bpm (title, bpm);");
@@ -30,6 +31,7 @@ public class DataAdder {
 			String text = reader.readLine();
 			while(text != null) {
 				String[] args = text.replace("'", "''").split("//");
+				System.out.println(Arrays.toString(args));
 				statement.executeUpdate("INSERT INTO music VALUES('"+args[0]+"', '"+args[1]+"', '"+args[2]+"', '"+args[3]+"', '"+args[4]+"', '"+args[5]+"', '"+args[6]+"', '"+args[7]+"')");
 				//statement.executeUpdate("insert into title values('"+args[0]+"', '"+args[1]+"')");
 				//statement.executeUpdate("insert into artist values('"+args[1]+"', '"+args[2]+"')");

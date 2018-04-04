@@ -1,52 +1,57 @@
 package jp.kotmw.chuniselect;
 
-import java.util.ArrayList;
+import java.awt.Color;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-public class EventListener {
+public class EventListener extends ListenerAdapter {
 	
 	String prefix = "/", separator = "\r\n";
 	
-	@EventSubscriber
-	public void onMessageRecive(MessageReceivedEvent event) {
+	@Override
+	public void onMessageReceived(MessageReceivedEvent event) {
 		if(event.getAuthor().isBot())
 			return;
-		String text = event.getMessage().getContent();
+		String text = event.getMessage().getContentStripped();
 		if(text == null || text.isEmpty())
 			return;
 		if(!text.startsWith(prefix))
 			return;
 		String[] args = text.split(" ");
 		if(args[0].equalsIgnoreCase("/random")) {
-			int limit = args.length >= 2 ? Integer.parseInt(args[1]) : 3;
-			String diff = getCommand(args, 3);
-			String category = getCommand(args, 4);
-			String artist = getCommand(args, 5);
-			int bpm = args.length >= 6 ? Integer.parseInt(args[5]) : 0;
-			List<String> texts = new ArrayList<>();
-			texts.add(event.getAuthor().mention());
-			texts.addAll(RandomSelector.randomget(limit, category, diff, artist, bpm));
-			texts.add("");
-			texts.add(randomSerif());
-			event.getChannel().sendMessage(convert(texts));
+			int limit = Integer.parseInt(getCommand(args, 2, "3"));
+			String diff = getCommand(args, 3, null);
+			String category = getCommand(args, 4, null);
+			String artist = getCommand(args, 5, null);
+			String bpm = getCommand(args, 6, "0");
+			event.getChannel().sendMessage(event.getAuthor().getAsMention()).embed(convertEmbed(RandomSelector.randomget(limit, category, diff, artist, bpm))).complete();
 		}
 	}
 	
-	private String convert(List<String> titles) {
-		String string = "";
-		for(String title : titles) {
-			string += title + separator;
+	private MessageEmbed convertEmbed(ResultSet set) {
+		EmbedBuilder builder = new EmbedBuilder();
+		builder.setColor(Color.GREEN);
+		builder.setTitle("おすすめ曲を教えてあげるね！ ");
+		builder.setDescription(randomSerif());
+		try {
+			while (set.next())
+				builder.addField("『"+set.getString("title")+"』", set.getString("artist")+separator+set.getString("category"), true);
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		return string;
+		return builder.build();
 	}
 	
-	private String getCommand(String[] str, int length) {
-		return str.length >= length && !str[length-1].contains("-") ? str[length-1] : null;
+	private String getCommand(String[] str, int length, String default_var) {
+		return str.length >= length && !str[length-1].contains("-") ? str[length-1] : default_var;
 	}
 	
 	private String randomSerif() {
