@@ -19,24 +19,24 @@ public class DataAdder {
 		File file = new File("musicdata.txt");
 		
 		try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
-			connection = DriverManager.getConnection("jdbc:sqlite:C://sqlite/chunithm.db");
+			connection = DriverManager.getConnection("jdbc:sqlite:C://sqlite/musicgame.db");
 			Statement statement = connection.createStatement();
 			statement.setQueryTimeout(30);
 			
 			statement.executeUpdate("CREATE TABLE music (category TEXT, title TEXT, artist TEXT, bpm INTEGER, basic REAL, advanced REAL, expert REAL, master REAL)");
-			//statement.executeUpdate("create table title (category, title);");
-			//statement.executeUpdate("create table artist (title, artist);");
-			//statement.executeUpdate("create table bpm (title, bpm);");
-			//statement.executeUpdate("create table diff (title, basic, advanced, expert, master);");
+			//statement.executeUpdate("CREATE TABLE title (category TEXT, title TEXT);");
+			//statement.executeUpdate("CREATE TABLE artist (title TEXT, artist TEXT);");
+			//statement.executeUpdate("CREATE TABLE bpm (title TEXT, bpm INTEGER);");
+			//statement.executeUpdate("CREATE TABLE diff (title TEXT, basic REAL, advanced REAL, expert REAL, master REAL);");
 			String text = reader.readLine();
 			while(text != null) {
 				String[] args = text.replace("'", "''").split("//");
 				System.out.println(Arrays.toString(args));
 				statement.executeUpdate("INSERT INTO music VALUES('"+args[0]+"', '"+args[1]+"', '"+args[2]+"', '"+args[3]+"', '"+args[4]+"', '"+args[5]+"', '"+args[6]+"', '"+args[7]+"')");
-				//statement.executeUpdate("insert into title values('"+args[0]+"', '"+args[1]+"')");
-				//statement.executeUpdate("insert into artist values('"+args[1]+"', '"+args[2]+"')");
-				//statement.executeUpdate("insert into bpm values('"+args[1]+"', '"+args[3]+"')");
-				//statement.executeUpdate("insert into diff values('"+args[1]+"', '"+args[4]+"', '"+args[5]+"', '"+args[6]+"', '"+args[7]+"')");
+				//statement.executeUpdate("INSERT INTO title VALUES('"+args[0]+"', '"+args[1]+"')");
+				//statement.executeUpdate("INSERT INTO artist VALUES('"+args[1]+"', '"+args[2]+"')");
+				//statement.executeUpdate("INSERT INTO bpm VALUES('"+args[1]+"', '"+args[3]+"')");
+				//statement.executeUpdate("INSERT INTO diff VALUES('"+args[1]+"', '"+args[4]+"', '"+args[5]+"', '"+args[6]+"', '"+args[7]+"')");
 				text = reader.readLine();
 			}
 		} catch (SQLException e) {
