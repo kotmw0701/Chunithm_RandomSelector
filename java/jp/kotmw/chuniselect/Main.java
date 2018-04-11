@@ -1,6 +1,7 @@
 package jp.kotmw.chuniselect;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -10,21 +11,25 @@ import jp.kotmw.chuniselect.Listener.EventListener;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import twitter4j.TwitterException;
-import twitter4j.TwitterStream;
-import twitter4j.TwitterStreamFactory;
 
 public class Main {
 
+	public static Configuration configuration;
+	
 	static boolean base = false;
 	
-	public static void main(String[] args) throws ClassNotFoundException, IOException, LoginException, InterruptedException, TwitterException {
+	public static void main(String[] args) throws ClassNotFoundException, IOException, LoginException, InterruptedException {
 		//DataAdder.createChuniDataBase();
 		if(base)
 			return;
-		TwitterStream stream = new TwitterStreamFactory().getInstance();
-		stream.addListener(new EventListener());
-		stream.user();
+		File file = new File("Settings.properties");
+		if(!file.exists()) {
+			new Configuration(file);
+			System.out.println("コンフィグファイルが生成されました，自身の値に設定し直してから再起動してください");
+			System.exit(0);
+			return;
+		}
+		configuration = new Configuration(file);
 		JDA jda = new JDABuilder(AccountType.BOT).setToken("NDI5NTUxMDMxNTg0NTU1MDEw.DaETbA.nYfkcARQerD8lUNZ1BVPVYtT4Ys").addEventListener(new EventListener()).buildBlocking();
 		try(BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
 			while(true) {
@@ -36,7 +41,6 @@ public class Main {
 				String[] command = text.split(" ");
 				if(command[0].equalsIgnoreCase("%stop")) {
 					jda.shutdown();
-					stream.shutdown();
 					System.exit(0);
 					return;
 				}
