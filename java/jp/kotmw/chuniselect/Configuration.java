@@ -9,15 +9,15 @@ import java.util.Properties;
 
 public class Configuration {
 	
-	private String path, user, password;
+	private String path;//, user, password;
 	private boolean debug = false;
 	
 	public Configuration(File file) throws IOException {
 		Properties properties = new Properties();
 		if(!file.exists()) {
-			properties.setProperty("Path", "//localhost:3306/Chunithm");
-			properties.setProperty("User", "root");
-			properties.setProperty("PassWord", "root");
+			properties.setProperty("Path", "Chunithm.db");
+			//properties.setProperty("User", "root");
+			//properties.setProperty("PassWord", "root");
 			properties.setProperty("Debug", "false");
 			properties.store(new FileOutputStream(file), "");
 			return;
@@ -25,8 +25,8 @@ public class Configuration {
 		try(InputStream stream = new FileInputStream(file)) {
 			properties.load(stream);
 			path = properties.getProperty("Path");
-			user = properties.getProperty("User");
-			password = properties.getProperty("PassWord");
+			//user = properties.getProperty("User");
+			//password = properties.getProperty("PassWord");
 			debug = Boolean.parseBoolean(properties.getProperty("Debug", "false"));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -35,14 +35,6 @@ public class Configuration {
 
 	public String getPath() {
 		return path;
-	}
-
-	public String getUser() {
-		return user;
-	}
-
-	public String getPassword() {
-		return password;
 	}
 
 	public boolean isDebug() {

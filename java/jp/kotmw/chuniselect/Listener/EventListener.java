@@ -1,12 +1,12 @@
 package jp.kotmw.chuniselect.Listener;
 
 import java.awt.Color;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import jp.kotmw.chuniselect.musicdatas.Chunithm;
 import jp.kotmw.chuniselect.selector.RandomSelector;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Message;
@@ -16,7 +16,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public class EventListener extends ListenerAdapter {
 	
-	String prefix = "/", separator = System.lineSeparator();
+	private String prefix = "/", separator = System.lineSeparator();
 	
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
@@ -39,8 +39,8 @@ public class EventListener extends ListenerAdapter {
 				return;
 			}
 			try {
-				event.getChannel().sendMessage(event.getAuthor().getAsMention()).embed(convertEmbed(RandomSelector.randomget(Integer.parseInt(limit), category, diff, artist, bpm))).complete();
-			} catch (NumberFormatException e) {
+				event.getChannel().sendMessage(event.getAuthor().getAsMention()).embed(convertEmbed(RandomSelector.selector.randomget(Integer.parseInt(limit), category, diff, artist, bpm))).complete();
+			} catch (NumberFormatException | SQLException e) {
 				lateRemover(event.getChannel().sendMessage(e.getMessage()+separator+"コマンドにエラーが存在します").complete());
 				e.printStackTrace();
 			}
@@ -50,17 +50,12 @@ public class EventListener extends ListenerAdapter {
 		}
 	}
 	
-	private MessageEmbed convertEmbed(ResultSet set) {
+	private MessageEmbed convertEmbed(List<Chunithm> chunithms) {
 		EmbedBuilder builder = new EmbedBuilder();
 		builder.setColor(Color.GREEN);
 		builder.setTitle("おすすめ曲を教えてあげるね！ ");
 		builder.setDescription(randomSerif());
-		try {
-			while (set.next())
-				builder.addField("『"+set.getString("title")+"』", set.getString("artist")+separator+set.getString("category"), true);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		chunithms.forEach(uni -> builder.addField("『"+uni.getTitle()+"』", uni.getArtist()+separator+uni.getCategory(), true));
 		return builder.build();
 	}
 	

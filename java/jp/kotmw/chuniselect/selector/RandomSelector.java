@@ -5,25 +5,42 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 import jp.kotmw.chuniselect.Configuration;
 import jp.kotmw.chuniselect.Main;
+import jp.kotmw.chuniselect.musicdatas.Chunithm;
 
 public class RandomSelector {
 	
-	public static ResultSet randomget(int limit, String category, String diff, String artist, String bpm) {
-		ResultSet set = null;
+	public static RandomSelector selector = new RandomSelector();
+	
+	Connection connection;
+	
+	private RandomSelector() {
 		Configuration config = Main.configuration;
-		try(Connection connection = DriverManager.getConnection("jdbc:mysql:"+config.getPath(), config.getUser(), config.getPassword()); Statement statement = connection.createStatement()) {
-			set = statement.executeQuery(execute(limit, category, diff, artist, bpm));
-		} catch (SQLException e) {
+		try {
+			Class.forName("org.sqlite.JDBC");
+			connection = DriverManager.getConnection("jdbc:sqlite:"+config.getPath());
+		} catch (SQLException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		return set;
 	}
 	
-	private static String execute(int limit, String category, String str_diff, String artist, String str_bpm) {
+	
+	public List<Chunithm> randomget(int limit, String category, String diff, String artist, String bpm) throws SQLException {
+		List<Chunithm> chunithms = new ArrayList<>();
+		Statement statement = connection.createStatement();
+		ResultSet set = statement.executeQuery(execute(limit, category, diff, artist, bpm));
+		while(set.next())
+			chunithms.add(new Chunithm(set));
+		statement.close();
+		return chunithms;
+	}
+	
+	private String execute(int limit, String category, String str_diff, String artist, String str_bpm) {
 		String ul_diff = getData(str_diff, false), ul_bpm = getData(str_bpm, false);
 		double diff = Double.parseDouble(getData(str_diff, true) != null ? getData(str_diff, true).replace("+", ".7") : "0.0");
 		int bpm = Integer.parseInt(getData(str_bpm, true) != null ? getData(str_bpm, true) : "0");
@@ -37,7 +54,7 @@ public class RandomSelector {
 		return sql;
 	}
 	
-	private static String getData(String str, boolean isvalue) {
+	private String getData(String str, boolean isvalue) {
 		if(str == null || str.isEmpty() || !str.contains(":") || str.split(":").length < 2)
 			return isvalue ? str : "=";
 		String[] args = str.split(":");
@@ -48,7 +65,7 @@ public class RandomSelector {
 		return ul;
 	}
 	
-	private static String createCategorySQL(String categorystack) {
+	private String createCategorySQL(String categorystack) {
 		if(categorystack.indexOf(",") == 1) categorystack.replaceFirst(",", "");
 		StringJoiner joiner = new StringJoiner("' OR category LIKE '", "WHERE (category LIKE '", "') ");
 		for(String category : categorystack.split(",")) joiner.add(category);

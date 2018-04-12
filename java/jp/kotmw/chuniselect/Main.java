@@ -30,7 +30,7 @@ public class Main {
 			return;
 		}
 		configuration = new Configuration(file);
-		JDA jda = new JDABuilder(AccountType.BOT).setToken("NDI5NTUxMDMxNTg0NTU1MDEw.DaETbA.nYfkcARQerD8lUNZ1BVPVYtT4Ys").addEventListener(new EventListener()).buildBlocking();
+		JDA jda = new JDABuilder(AccountType.BOT).setToken("*****").addEventListener(new EventListener()).buildBlocking();
 		try(BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
 			while(true) {
 				String text = reader.readLine();
